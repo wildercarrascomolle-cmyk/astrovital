@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}{% endblock %} · AstroVital</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/astrovital.css') }}">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230b1d3a'/%3E%3Cpath d='M5 17h6l3-7 4 13 3-6h6' stroke='%2322d3ee' stroke-width='2.5' fill='none'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="cabecera">
+    <div class="env cabecera__fila">
+        <a class="marca" href="{{ url_for('auth.inicio') }}">
+            <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#13294b" stroke="#22d3ee" stroke-width="1.5"/><path d="M5 17h6l3-7 4 13 3-6h6" stroke="#22d3ee" stroke-width="2.4" fill="none" stroke-linejoin="round"/></svg>
+            <span>Astro<b>Vital</b></span>
+        </a>
+        {% if g.usuario %}
+        <nav class="menu" aria-label="Módulos">
+            {% set bpn = request.blueprint %}
+            <a href="{{ url_for('panel.inicio') }}" class="{{ 'activo' if bpn == 'panel' }}">Panel</a>
+            <a href="{{ url_for('salud.lista') }}" class="{{ 'activo' if bpn == 'salud' }}">Salud</a>
+            <a href="{{ url_for('misiones.lista') }}" class="{{ 'activo' if bpn == 'misiones' }}">Misiones</a>
+            {% if g.usuario.rol in ['ADMIN', 'MEDICO'] %}<a href="{{ url_for('astronautas.lista') }}" class="{{ 'activo' if bpn == 'astronautas' }}">Tripulación</a>{% endif %}
+            {% if g.usuario.rol == 'ADMIN' %}<a href="{{ url_for('usuarios.lista') }}" class="{{ 'activo' if bpn == 'usuarios' }}">Usuarios</a>{% endif %}
+        </nav>
+        <div class="sesion">
+            <span class="sesion__nombre">{{ g.usuario.nombre }}</span>
+            <span class="rol rol--{{ g.usuario.rol|lower }}">{{ g.usuario.rol|rol }}</span>
+            <form method="post" action="{{ url_for('auth.logout') }}" class="en-linea">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                <button class="boton-salir">Salir</button>
+            </form>
+        </div>
+        {% else %}
+        <nav class="menu">
+            <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+            <a href="{{ url_for('auth.registro') }}">Registrarse</a>
+        </nav>
+        {% endif %}
+    </div>
+</header>
+<main class="env contenido">
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in mensajes %}<div class="alerta alerta--{{ cat }}" role="status">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    {% block contenido %}{% endblock %}
+</main>
+<footer class="pie">
+    <div class="env pie__fila">
+        <span>AstroVital · NASA Space Apps Challenge 2026 · Reto «Create Health Monitoring Software for Astronauts on Space Missions»</span>
+        <span>Prototipo académico · los umbrales de alerta son de demostración, no clínicos</span>
+    </div>
+</footer>
+</body>
+</html>

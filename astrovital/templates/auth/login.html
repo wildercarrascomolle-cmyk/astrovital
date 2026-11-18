@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+<div class="acceso">
+    <section class="acceso__intro">
+        <p class="eti">NASA Space Apps Challenge 2026</p>
+        <h1>Monitoreo de salud para tripulaciones en misiones espaciales</h1>
+        <p>Los astronautas registran a diario sus indicadores de salud; AstroVital detecta los valores fuera de rango y avisa al médico de vuelo para que responda a tiempo, aunque la misión esté lejos de la Tierra.</p>
+        <ul class="checks">
+            <li>Registro diario de 8 indicadores</li>
+            <li>Alertas automáticas de atención y críticas</li>
+            <li>Revisión y notas del médico de vuelo</li>
+        </ul>
+    </section>
+    <section class="tarjeta">
+        <h2>Iniciar sesión</h2>
+        <form method="post" class="form">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label class="campo">Correo electrónico<input name="email" type="email" value="{{ email }}" autocomplete="username" required></label>
+            <label class="campo">Contraseña<input name="clave" type="password" autocomplete="current-password" required></label>
+            <button class="boton boton--bloque">Ingresar</button>
+        </form>
+        <p class="ayuda centro">¿Es astronauta y no tiene cuenta? <a href="{{ url_for('auth.registro') }}">Regístrese</a></p>
+        <details class="demo">
+            <summary>Cuentas de demostración</summary>
+            <table class="tabla tabla--mini">
+                <tr><td>Administrador</td><td class="mono">admin@astrovital.dev</td><td class="mono">Admin2026</td></tr>
+                <tr><td>Médico de vuelo</td><td class="mono">medico@astrovital.dev</td><td class="mono">Medico2026</td></tr>
+                <tr><td>Astronauta</td><td class="mono">andres@astrovital.dev</td><td class="mono">Astro2026</td></tr>
+            </table>
+        </details>
+    </section>
+</div>
+{% endblock %}

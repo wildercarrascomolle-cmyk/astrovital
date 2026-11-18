@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Misiones{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div><p class="eti">Módulo de misiones</p><h1>Misiones</h1><p class="sub">Misiones a las que se asigna la tripulación.</p></div>
+    {% if g.usuario.rol == 'ADMIN' %}<a class="boton" href="{{ url_for('misiones.nueva') }}">+ Nueva misión</a>{% endif %}
+</div>
+<section class="tarjeta">
+    <div class="tabla-env">
+    <table class="tabla">
+        <thead><tr><th>Código</th><th>Misión</th><th>Destino</th><th>Fechas</th><th>Estado</th><th class="num">Tripulantes</th>{% if g.usuario.rol == 'ADMIN' %}<th></th>{% endif %}</tr></thead>
+        <tbody>
+        {% for m in misiones %}
+            <tr>
+                <td class="mono">{{ m.codigo }}</td>
+                <td><strong>{{ m.nombre }}</strong><br><span class="ayuda">{{ m.descripcion }}</span></td>
+                <td>{{ m.destino }}</td>
+                <td>{{ m.fecha_inicio|fecha }} – {{ m.fecha_fin|fecha }}</td>
+                <td><span class="chip chip--{{ m.estado|replace(' ', '')|lower }}">{{ m.estado }}</span></td>
+                <td class="num">{{ m.tripulantes }}</td>
+                {% if g.usuario.rol == 'ADMIN' %}
+                <td class="acciones">
+                    <a href="{{ url_for('misiones.editar', mid=m.id) }}">Editar</a>
+                    <form method="post" action="{{ url_for('misiones.eliminar', mid=m.id) }}" class="en-linea">
+                        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="enlace-rojo">Eliminar</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="vacio">No hay misiones registradas.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div><p class="eti">Gestión de usuarios</p><h1>Usuarios y roles</h1>
+        <p class="sub">El administrador asigna los roles y puede desactivar cuentas.</p></div>
+</div>
+<section class="tarjeta">
+    <div class="tabla-env">
+    <table class="tabla">
+        <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Creado</th></tr></thead>
+        <tbody>
+        {% for u in usuarios %}
+            <tr>
+                <td><strong>{{ u.nombre }}</strong>{% if u.ficha %}<br><span class="ayuda">Ficha de astronauta vinculada</span>{% endif %}</td>
+                <td class="mono">{{ u.email }}</td>
+                <td>
+                    {% if u.id == g.usuario.id %}<span class="rol rol--{{ u.rol|lower }}">{{ u.rol|rol }}</span> <span class="ayuda">(usted)</span>
+                    {% else %}
+                    <form method="post" action="{{ url_for('usuarios.cambiar_rol', uid=u.id) }}" class="en-linea fila-mini">
+                        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                        <select name="rol">{% for r in roles %}<option value="{{ r }}" {{ 'selected' if u.rol == r }}>{{ r|rol }}</option>{% endfor %}</select>
+                        <button class="boton boton--sec boton--mini">Cambiar</button>
+                    </form>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.id != g.usuario.id %}
+                    <form method="post" action="{{ url_for('usuarios.cambiar_estado', uid=u.id) }}" class="en-linea">
+                        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                        <button class="chip {{ 'chip--ok' if u.activo else 'chip--pendiente' }} chip--boton">{{ 'Activa' if u.activo else 'Desactivada' }}</button>
+                    </form>
+                    {% else %}<span class="chip chip--ok">Activa</span>{% endif %}
+                </td>
+                <td>{{ u.creado_en|fecha }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

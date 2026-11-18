@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titulo %}Registro de salud{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div>
+        <p class="eti">Módulo de salud · registro #{{ r.id }}</p>
+        <h1>{{ r.astronauta }}</h1>
+        <p class="sub">{{ r.fecha_hora|fecha(true) }}</p>
+    </div>
+    <span class="estado estado--{{ nivel }} estado--grande">{{ nivel|nivel }}</span>
+</div>
+
+<div class="detalle">
+<section class="tarjeta">
+    <h2>Indicadores</h2>
+    <div class="tabla-env">
+    <table class="tabla">
+        <thead><tr><th>Indicador</th><th class="num">Valor</th><th>Rango de referencia</th><th>Evaluación</th></tr></thead>
+        <tbody>
+        {% for campo, (etq, uni, normal, critico) in UMBRALES.items() %}
+            {% set n = evaluar_valor(campo, r[campo]) %}
+            <tr>
+                <td>{{ etq }}</td>
+                <td class="num v--{{ n }}"><strong>{{ r[campo]|numero }}</strong> {{ uni }}</td>
+                <td class="ayuda">{{ normal[0] }} – {{ normal[1] }} {{ uni }}</td>
+                <td><span class="estado estado--{{ n }}">{{ n|nivel }}</span></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% if r.sintomas %}<p><strong>Síntomas reportados:</strong> {{ r.sintomas }}</p>{% endif %}
+    {% if puede_modificar %}
+    <div class="form__acciones">
+        <form method="post" action="{{ url_for('salud.eliminar', rid=r.id) }}" class="en-linea">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="boton boton--peligro">Eliminar</button>
+        </form>
+        <a class="boton boton--sec" href="{{ url_for('salud.editar', rid=r.id) }}">Editar</a>
+    </div>
+    {% endif %}
+</section>
+
+<aside>
+    <section class="tarjeta">
+        <h2>Revisión médica</h2>
+        {% if r.revisado %}
+            <p class="chip chip--ok">Revisado</p>
+            <p>{{ r.nota_medica }}</p>
+        {% else %}
+            <p class="chip chip--pendiente">Pendiente de revisión</p>
+        {% endif %}
+        {% if g.usuario.rol == 'MEDICO' %}
+        <form method="post" action="{{ url_for('salud.revisar', rid=r.id) }}" class="form">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label class="campo">Nota del médico de vuelo<textarea name="nota_medica" maxlength="500" required>{{ r.nota_medica }}</textarea></label>
+            <button class="boton">Guardar revisión</button>
+        </form>
+        {% endif %}
+    </section>
+    <section class="tarjeta">
+        <h2>Tendencia · últimos registros</h2>
+        <div class="tendencias tendencias--col">
+            <div><span>Frecuencia cardiaca</span>{{ sparkline(historial|map(attribute='frecuencia_cardiaca')|list, 220, 44)|safe }}</div>
+            <div><span>SpO₂</span>{{ sparkline(historial|map(attribute='spo2')|list, 220, 44)|safe }}</div>
+            <div><span>Horas de sueño</span>{{ sparkline(historial|map(attribute='horas_sueno')|list, 220, 44)|safe }}</div>
+        </div>
+    </section>
+</aside>
+</div>
+{% endblock %}

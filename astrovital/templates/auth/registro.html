@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Registro{% endblock %}
+{% block contenido %}
+<section class="tarjeta angosta">
+    <h1>Registro de astronauta</h1>
+    <p class="sub">Cree su cuenta para registrar sus indicadores de salud. Las cuentas de médico y administrador las asigna el administrador.</p>
+    {% if errores %}<div class="alerta alerta--error"><ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+    <form method="post" class="form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="fila">
+            <label class="campo">Nombre completo<input name="nombre" value="{{ datos.nombre or '' }}" maxlength="120" required></label>
+            <label class="campo">Correo electrónico<input name="email" type="email" value="{{ datos.email or '' }}" maxlength="120" required></label>
+        </div>
+        <div class="fila">
+            <label class="campo">Agencia
+                <select name="agencia" required><option value="">— Seleccione —</option>
+                {% for a in agencias %}<option {{ 'selected' if datos.agencia == a }}>{{ a }}</option>{% endfor %}</select></label>
+            <label class="campo">Especialidad<input name="especialidad" value="{{ datos.especialidad or '' }}" placeholder="Ej. Ingeniera de vuelo" maxlength="120" required></label>
+        </div>
+        <div class="fila">
+            <label class="campo">Contraseña<input name="clave" type="password" autocomplete="new-password" required><small>Mínimo 8 caracteres, con letras y números.</small></label>
+            <label class="campo">Confirmar contraseña<input name="confirmar" type="password" autocomplete="new-password" required></label>
+        </div>
+        <button class="boton">Crear cuenta</button>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Panel{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div>
+        <p class="eti">Panel · {{ g.usuario.rol|rol }}</p>
+        <h1>Hola, {{ g.usuario.nombre }}</h1>
+        <p class="sub">{% if g.usuario.rol == 'ASTRONAUTA' %}Este es el estado de su último registro de salud.{% else %}Estado de salud de la tripulación según el último registro de cada astronauta.{% endif %}</p>
+    </div>
+    <a class="boton" href="{{ url_for('salud.nuevo') }}">+ Registrar indicadores</a>
+</div>
+
+{% if g.usuario.rol != 'ASTRONAUTA' %}
+<div class="kpis">
+    <div class="kpi"><span>Misiones en curso</span><strong>{{ resumen.misiones }}</strong></div>
+    <div class="kpi"><span>Astronautas</span><strong>{{ resumen.astronautas }}</strong></div>
+    <div class="kpi kpi--rojo"><span>En estado crítico</span><strong>{{ resumen.criticos }}</strong></div>
+    <div class="kpi kpi--ambar"><span>Requieren atención</span><strong>{{ resumen.atencion }}</strong></div>
+    <a class="kpi kpi--enlace" href="{{ url_for('salud.lista', pendientes=1) }}"><span>Registros sin revisar</span><strong>{{ resumen.pendientes }}</strong></a>
+</div>
+{% endif %}
+
+<div class="tripulacion">
+{% for f in filas %}
+    <article class="astro astro--{{ f.nivel }}">
+        <header class="astro__cab">
+            <div>
+                <h2>{{ f.a.nombre }}</h2>
+                <p class="ayuda">{{ f.a.especialidad }} · {{ f.a.agencia }}{% if f.a.mision %} · {{ f.a.mision }} ({{ f.a.destino }}){% endif %}</p>
+            </div>
+            <span class="estado estado--{{ f.nivel }}">{{ f.nivel|nivel }}</span>
+        </header>
+        {% if f.ultimo %}
+        <div class="indicadores">
+            {% for campo in ['frecuencia_cardiaca', 'spo2', 'presion_sistolica', 'temperatura', 'horas_sueno', 'radiacion_msv'] %}
+            {% set n = evaluar_valor(campo, f.ultimo[campo]) %}
+            <div class="ind ind--{{ n }}">
+                <span>{{ UMBRALES[campo][0] }}</span>
+                <strong>{{ f.ultimo[campo]|numero }}{% if campo == 'presion_sistolica' %}/{{ f.ultimo.presion_diastolica }}{% endif %} <small>{{ UMBRALES[campo][1] }}</small></strong>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="tendencias">
+            <div><span>Frecuencia cardiaca · 14 días</span>{{ sparkline(f.serie_fc)|safe }}</div>
+            <div><span>Sueño · 14 días</span>{{ sparkline(f.serie_sueno)|safe }}</div>
+        </div>
+        {% if f.alertas %}
+        <ul class="lista-alertas">
+            {% for etq, val, uni, niv in f.alertas %}<li class="la--{{ niv }}"><b>{{ niv|nivel }}:</b> {{ etq }} = {{ val|numero }} {{ uni }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        <footer class="astro__pie">
+            <span class="ayuda">Último registro: {{ f.ultimo.fecha_hora|fecha(true) }}</span>
+            <a href="{{ url_for('salud.detalle', rid=f.ultimo.id) }}">Ver detalle →</a>
+        </footer>
+        {% else %}
+        <p class="vacio">Sin registros todavía.</p>
+        {% endif %}
+    </article>
+{% else %}
+    <p class="vacio">No hay astronautas para mostrar.</p>
+{% endfor %}
+</div>
+{% endblock %}

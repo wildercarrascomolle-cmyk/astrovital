@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if registro else 'Nuevo' }} registro{% endblock %}
+{% block contenido %}
+<section class="tarjeta angosta">
+    <p class="eti">Módulo de salud</p>
+    <h1>{{ 'Editar registro de ' ~ registro.astronauta if registro else 'Registrar indicadores de salud' }}</h1>
+    {% if ficha %}<p class="sub">Astronauta: <strong>{{ ficha.nombre }}</strong></p>{% endif %}
+    {% if errores %}<div class="alerta alerta--error"><ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+    <form method="post" class="form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="fila">
+            {% if astronautas %}
+            <label class="campo">Astronauta<select name="astronauta_id" required><option value="">— Seleccione —</option>
+                {% for a in astronautas %}<option value="{{ a.id }}" {{ 'selected' if datos.astronauta_id|string == a.id|string }}>{{ a.nombre }}</option>{% endfor %}</select></label>
+            {% endif %}
+            <label class="campo">Fecha y hora<input type="datetime-local" name="fecha_hora" value="{{ datos.fecha_hora }}" required></label>
+        </div>
+        <fieldset class="grupo">
+            <legend>Signos vitales</legend>
+            <div class="fila fila--4">
+                <label class="campo">Frecuencia cardiaca (lpm)<input name="frecuencia_cardiaca" value="{{ datos.frecuencia_cardiaca|default('') }}" inputmode="numeric" required></label>
+                <label class="campo">Presión sistólica (mmHg)<input name="presion_sistolica" value="{{ datos.presion_sistolica|default('') }}" inputmode="numeric" required></label>
+                <label class="campo">Presión diastólica (mmHg)<input name="presion_diastolica" value="{{ datos.presion_diastolica|default('') }}" inputmode="numeric" required></label>
+                <label class="campo">SpO₂ (%)<input name="spo2" value="{{ datos.spo2|default('') }}" inputmode="numeric" required></label>
+            </div>
+        </fieldset>
+        <fieldset class="grupo">
+            <legend>Condiciones de la misión</legend>
+            <div class="fila fila--4">
+                <label class="campo">Temperatura (°C)<input name="temperatura" value="{{ datos.temperatura|default('') }}" inputmode="decimal" required></label>
+                <label class="campo">Horas de sueño<input name="horas_sueno" value="{{ datos.horas_sueno|default('') }}" inputmode="decimal" required></label>
+                <label class="campo">Radiación del día (mSv)<input name="radiacion_msv" value="{{ datos.radiacion_msv|default('') }}" inputmode="decimal" required></label>
+                <label class="campo">Ánimo (1 a 5)<select name="animo">{% for n in range(5, 0, -1) %}<option value="{{ n }}" {{ 'selected' if datos.animo|default(4)|int == n }}>{{ n }}{{ ' · muy bien' if n == 5 else (' · muy mal' if n == 1 else '') }}</option>{% endfor %}</select></label>
+            </div>
+        </fieldset>
+        <label class="campo">Síntomas u observaciones<textarea name="sintomas" maxlength="300" placeholder="Opcional">{{ datos.sintomas or '' }}</textarea></label>
+        <div class="form__acciones">
+            <a class="boton boton--sec" href="{{ url_for('salud.detalle', rid=registro.id) if registro else url_for('salud.lista') }}">Cancelar</a>
+            <button class="boton">Guardar registro</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

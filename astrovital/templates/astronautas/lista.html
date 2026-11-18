@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Tripulación{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div><p class="eti">Módulo de tripulación</p><h1>Tripulación</h1><p class="sub">Astronautas, su agencia y la misión asignada.</p></div>
+    {% if g.usuario.rol == 'ADMIN' %}<a class="boton" href="{{ url_for('astronautas.editar') }}">+ Agregar astronauta</a>{% endif %}
+</div>
+<section class="tarjeta">
+    <div class="tabla-env">
+    <table class="tabla">
+        <thead><tr><th>Astronauta</th><th>Agencia</th><th>Especialidad</th><th>Misión</th><th>Cuenta</th><th class="num">Registros</th>{% if g.usuario.rol == 'ADMIN' %}<th></th>{% endif %}</tr></thead>
+        <tbody>
+        {% for a in filas %}
+            <tr>
+                <td><strong>{{ a.nombre }}</strong></td>
+                <td>{{ a.agencia }}</td>
+                <td>{{ a.especialidad }}</td>
+                <td>{% if a.mision %}<span class="mono">{{ a.mision_codigo }}</span> {{ a.mision }}{% else %}<span class="ayuda">Sin asignar</span>{% endif %}</td>
+                <td class="ayuda">{{ a.email or 'Sin cuenta' }}</td>
+                <td class="num"><a href="{{ url_for('salud.lista', astronauta=a.id) }}">{{ a.registros }}</a></td>
+                {% if g.usuario.rol == 'ADMIN' %}
+                <td class="acciones">
+                    <a href="{{ url_for('astronautas.editar', aid=a.id) }}">Editar</a>
+                    <form method="post" action="{{ url_for('astronautas.eliminar', aid=a.id) }}" class="en-linea">
+                        <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="enlace-rojo">Eliminar</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

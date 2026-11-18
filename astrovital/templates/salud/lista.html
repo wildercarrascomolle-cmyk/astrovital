@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titulo %}Registros de salud{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div><p class="eti">Módulo de salud</p><h1>Registros de salud</h1>
+        <p class="sub">{% if g.usuario.rol == 'ASTRONAUTA' %}Sus registros diarios de indicadores.{% else %}Registros de toda la tripulación, del más reciente al más antiguo.{% endif %}</p></div>
+    <a class="boton" href="{{ url_for('salud.nuevo') }}">+ Nuevo registro</a>
+</div>
+
+{% if g.usuario.rol != 'ASTRONAUTA' %}
+<form method="get" class="tarjeta filtros">
+    <label class="campo">Astronauta<select name="astronauta"><option value="">Todos</option>
+        {% for a in astronautas %}<option value="{{ a.id }}" {{ 'selected' if args.get('astronauta') == a.id|string }}>{{ a.nombre }}</option>{% endfor %}</select></label>
+    <label class="campo">Nivel<select name="nivel"><option value="">Todos</option>
+        {% for n, t in [('critico', 'Crítico'), ('atencion', 'Atención'), ('normal', 'Normal')] %}<option value="{{ n }}" {{ 'selected' if args.get('nivel') == n }}>{{ t }}</option>{% endfor %}</select></label>
+    <label class="casilla"><input type="checkbox" name="pendientes" value="1" {{ 'checked' if args.get('pendientes') }}> Solo sin revisar</label>
+    <button class="boton boton--sec">Filtrar</button>
+</form>
+{% endif %}
+
+<section class="tarjeta">
+    <div class="tabla-env">
+    <table class="tabla">
+        <thead><tr><th>Fecha</th>{% if g.usuario.rol != 'ASTRONAUTA' %}<th>Astronauta</th>{% endif %}<th class="num">FC</th><th class="num">PA</th><th class="num">SpO₂</th><th class="num">Temp.</th><th class="num">Sueño</th><th class="num">Radiación</th><th>Nivel</th><th>Revisión</th></tr></thead>
+        <tbody>
+        {% for f in filas %}{% set r = f.r %}
+            <tr>
+                <td><a href="{{ url_for('salud.detalle', rid=r.id) }}">{{ r.fecha_hora|fecha(true) }}</a></td>
+                {% if g.usuario.rol != 'ASTRONAUTA' %}<td>{{ r.astronauta }}</td>{% endif %}
+                <td class="num v--{{ evaluar_valor('frecuencia_cardiaca', r.frecuencia_cardiaca) }}">{{ r.frecuencia_cardiaca }}</td>
+                <td class="num v--{{ evaluar_valor('presion_sistolica', r.presion_sistolica) }}">{{ r.presion_sistolica }}/{{ r.presion_diastolica }}</td>
+                <td class="num v--{{ evaluar_valor('spo2', r.spo2) }}">{{ r.spo2 }}%</td>
+                <td class="num v--{{ evaluar_valor('temperatura', r.temperatura) }}">{{ r.temperatura|numero }}</td>
+                <td class="num v--{{ evaluar_valor('horas_sueno', r.horas_sueno) }}">{{ r.horas_sueno|numero }} h</td>
+                <td class="num v--{{ evaluar_valor('radiacion_msv', r.radiacion_msv) }}">{{ r.radiacion_msv|numero }}</td>
+                <td><span class="estado estado--{{ f.nivel }}">{{ f.nivel|nivel }}</span></td>
+                <td>{% if r.revisado %}<span class="chip chip--ok">Revisado</span>{% else %}<span class="chip chip--pendiente">Pendiente</span>{% endif %}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="10" class="vacio">No hay registros.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <p class="ayuda">FC: frecuencia cardiaca (lpm) · PA: presión arterial (mmHg) · Temp. en °C · Radiación: dosis diaria en mSv.</p>
+</section>
+{% endblock %}

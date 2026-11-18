@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if actual else 'Nuevo' }} astronauta{% endblock %}
+{% block contenido %}
+<section class="tarjeta angosta">
+    <p class="eti">Módulo de tripulación</p>
+    <h1>{{ 'Editar ' ~ actual.nombre if actual else 'Agregar astronauta' }}</h1>
+    {% if errores %}<div class="alerta alerta--error"><ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+    <form method="post" class="form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <label class="campo">Nombre completo<input name="nombre" value="{{ datos.nombre or '' }}" maxlength="120" required></label>
+        <div class="fila">
+            <label class="campo">Agencia<select name="agencia">{% for a in agencias %}<option {{ 'selected' if datos.agencia == a }}>{{ a }}</option>{% endfor %}</select></label>
+            <label class="campo">Especialidad<input name="especialidad" value="{{ datos.especialidad or '' }}" maxlength="120" required></label>
+        </div>
+        <label class="campo">Misión asignada
+            <select name="mision_id"><option value="">Sin asignar</option>
+            {% for m in misiones %}<option value="{{ m.id }}" {{ 'selected' if datos.mision_id == m.id }}>{{ m.codigo }} · {{ m.nombre }}</option>{% endfor %}</select></label>
+        <div class="form__acciones"><a class="boton boton--sec" href="{{ url_for('astronautas.lista') }}">Cancelar</a><button class="boton">Guardar</button></div>
+    </form>
+</section>
+{% endblock %}

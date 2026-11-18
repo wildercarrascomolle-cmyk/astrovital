@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if mision else 'Nueva' }} misión{% endblock %}
+{% block contenido %}
+<section class="tarjeta angosta">
+    <p class="eti">Módulo de misiones</p>
+    <h1>{{ 'Editar misión ' ~ mision.codigo if mision else 'Nueva misión' }}</h1>
+    {% if errores %}<div class="alerta alerta--error"><ul>{% for e in errores %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+    <form method="post" class="form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="fila">
+            <label class="campo">Código<input name="codigo" value="{{ datos.codigo or '' }}" maxlength="10" class="mono" required></label>
+            <label class="campo">Nombre<input name="nombre" value="{{ datos.nombre or '' }}" maxlength="100" required></label>
+        </div>
+        <div class="fila">
+            <label class="campo">Destino<select name="destino">{% for d in destinos %}<option {{ 'selected' if datos.destino == d }}>{{ d }}</option>{% endfor %}</select></label>
+            <label class="campo">Estado<select name="estado">{% for e in estados %}<option {{ 'selected' if datos.estado == e }}>{{ e }}</option>{% endfor %}</select></label>
+        </div>
+        <div class="fila">
+            <label class="campo">Fecha de inicio<input type="date" name="fecha_inicio" value="{{ datos.fecha_inicio or '' }}" required></label>
+            <label class="campo">Fecha de fin<input type="date" name="fecha_fin" value="{{ datos.fecha_fin or '' }}" required></label>
+        </div>
+        <label class="campo">Descripción<textarea name="descripcion" maxlength="500">{{ datos.descripcion or '' }}</textarea></label>
+        <div class="form__acciones"><a class="boton boton--sec" href="{{ url_for('misiones.lista') }}">Cancelar</a><button class="boton">Guardar</button></div>
+    </form>
+</section>
+{% endblock %}
